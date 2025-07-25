@@ -15,7 +15,8 @@ step_count = 4096 # 5.625*(1/64) per step, 4096 steps is 360°
 direction = False # True for clockwise, False for counter-clockwise
 
 # defining stepper motor sequence (found in documentation http://www.4tronix.co.uk/arduino/Stepper-Motors.php)
-step_sequence = [[1,0,0,1],
+#more precise
+half_step_sequence = [[1,0,0,1],
                  [1,0,0,0],
                  [1,1,0,0],
                  [0,1,0,0],
@@ -23,6 +24,14 @@ step_sequence = [[1,0,0,1],
                  [0,0,1,0],
                  [0,0,1,1],
                  [0,0,0,1]]
+#faster (engine gets hot)
+full_step_sequence = [
+                 [1,0,0,0],
+                 [0,1,0,0],
+                 [0,0,1,0],
+                 [0,0,0,1]]
+
+step_sequence = half_step_sequence
 
 # setting up
 GPIO.setmode( GPIO.BCM )
@@ -55,9 +64,9 @@ try:
             for pin in range(0, len(motor_pins)):
                 GPIO.output( motor_pins[pin], step_sequence[motor_step_counter][pin] )
             if direction==True:
-                motor_step_counter = (motor_step_counter - 1) % 8
+                motor_step_counter = (motor_step_counter - 1) % len(step_sequence)
             elif direction==False:
-                motor_step_counter = (motor_step_counter + 1) % 8
+                motor_step_counter = (motor_step_counter + 1) % len(step_sequence)
             else: # defensive programming
                 print( "uh oh... direction should *always* be either True or False" )
                 cleanup()
